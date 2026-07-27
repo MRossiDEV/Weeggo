@@ -196,7 +196,7 @@ export function SwipeCard({
                 }}
               />
             </div>
-            <div className="font-weeggo-mono whitespace-nowrap text-[11px] font-medium">
+            <div className="whitespace-nowrap text-xl">
               {t("discover.matchLabel", { pct: score })}
             </div>
           </div>

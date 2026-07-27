@@ -15,6 +15,10 @@ export interface Listing {
   title: string;
   /** Neighborhood — reuses weeggo_properties.city, e.g. "Pocitos". */
   city: string;
+  /** City/locality, e.g. "Montevideo", "Punta del Este". Null when not set. */
+  locality: string | null;
+  /** Uruguayan department, e.g. "Montevideo", "Maldonado". Null when not set. */
+  department: string | null;
   description: string;
   /** Sale price, USD. */
   price: number;

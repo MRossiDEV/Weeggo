@@ -80,6 +80,29 @@ export function PartnerForm({
           </Field>
         </div>
 
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field>
+            <FieldLabel htmlFor="country">País</FieldLabel>
+            <FieldContent>
+              <Input id="country" name="country" defaultValue={partner?.country ?? "Uruguay"} />
+            </FieldContent>
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="city">Ciudad</FieldLabel>
+            <FieldContent>
+              <Input id="city" name="city" defaultValue={partner?.city} />
+            </FieldContent>
+          </Field>
+        </div>
+
+        <Field>
+          <FieldLabel htmlFor="address">Dirección</FieldLabel>
+          <FieldContent>
+            <Input id="address" name="address" defaultValue={partner?.address} />
+          </FieldContent>
+        </Field>
+
         <Field>
           <FieldLabel htmlFor="notes">Notas</FieldLabel>
           <FieldContent>

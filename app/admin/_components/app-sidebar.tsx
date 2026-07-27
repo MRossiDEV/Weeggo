@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
+  Bot,
   Building2,
   Handshake,
   LayoutDashboard,
@@ -26,6 +27,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Badge } from "@/components/ui/badge";
 import { signOutAdminAction } from "@/app/admin/_lib/actions/auth";
 import { Logo } from "@/components/Logo";
 
@@ -35,6 +37,7 @@ const navItems = [
   { title: "Leads", href: "/admin/leads", icon: Users },
   { title: "Agentes", href: "/admin/agents", icon: UserCog },
   { title: "Partners", href: "/admin/partners", icon: Handshake },
+  { title: "Asistente", href: "/admin/wizard", icon: Bot },
   { title: "Emails", href: "/admin/emails", icon: Mail },
   { title: "Configuración", href: "/admin/settings", icon: Settings },
 ];
@@ -45,16 +48,21 @@ export function AppSidebar({ adminName }: { adminName: string }) {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <Link href="/admin" className="flex items-center px-2 py-1.5">
-          <Logo height={20} className="group-data-[collapsible=icon]:hidden" />
-          <Image
-            src="/images/brand/weeggo-icon.svg"
-            alt="WEEGGO"
-            width={20}
-            height={20}
-            className="hidden group-data-[collapsible=icon]:block"
-          />
-        </Link>
+        <div className="flex items-center justify-between px-2 py-1.5">
+          <Link href="/admin" className="flex items-center">
+            <Logo height={20} className="group-data-[collapsible=icon]:hidden" />
+            <Image
+              src="/images/brand/weeggo-icon.svg"
+              alt="WEEGGO"
+              width={20}
+              height={20}
+              className="hidden group-data-[collapsible=icon]:block"
+            />
+          </Link>
+          <Badge variant="outline" className="group-data-[collapsible=icon]:hidden">
+            Admin
+          </Badge>
+        </div>
       </SidebarHeader>
 
       <SidebarContent>

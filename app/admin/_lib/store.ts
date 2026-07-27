@@ -15,6 +15,12 @@ import type {
   PropertyType,
   SiteSettings,
   WizardAnswerValue,
+  WizardConditionOperator,
+  WizardFlow,
+  WizardQuestion,
+  WizardQuestionCategory,
+  WizardQuestionStatus,
+  WizardQuestionType,
 } from "./types";
 
 export type PropertyRow = {
@@ -54,6 +60,9 @@ type PartnerRow = {
   contact_name: string | null;
   email: string | null;
   phone: string | null;
+  country: string | null;
+  city: string | null;
+  address: string | null;
   notes: string | null;
   active: boolean;
   password_hash: string | null;
@@ -72,6 +81,7 @@ export type LeadRow = {
   assessment: Record<string, WizardAnswerValue> | null;
   status: LeadStatus;
   assigned_agent_id: string | null;
+  property_id: string | null;
   created_at: string;
 };
 
@@ -186,6 +196,9 @@ function mapPartner(row: PartnerRow): Partner {
     contactName: row.contact_name ?? undefined,
     email: row.email ?? undefined,
     phone: row.phone ?? undefined,
+    country: row.country ?? undefined,
+    city: row.city ?? undefined,
+    address: row.address ?? undefined,
     notes: row.notes ?? undefined,
     active: row.active,
     hasAccount: row.password_hash !== null,
@@ -206,6 +219,7 @@ export function mapLead(row: LeadRow): Lead {
     assessment: row.assessment ?? undefined,
     status: row.status,
     assignedAgentId: row.assigned_agent_id ?? undefined,
+    propertyId: row.property_id ?? undefined,
     createdAt: new Date(row.created_at).getTime(),
   };
 }
@@ -441,6 +455,17 @@ export const leadsStore = {
     return (data as LeadRow[]).map(mapLead);
   },
 
+  async listByPropertyIds(propertyIds: string[]): Promise<Lead[]> {
+    if (propertyIds.length === 0) return [];
+    const { data, error } = await supabaseAdmin
+      .from("weeggo_leads")
+      .select("*")
+      .in("property_id", propertyIds)
+      .order("created_at", { ascending: false });
+    assertNoError(error);
+    return (data as LeadRow[]).map(mapLead);
+  },
+
   async get(id: string): Promise<Lead | undefined> {
     const { data, error } = await supabaseAdmin
       .from("weeggo_leads")
@@ -588,6 +613,9 @@ export const partnersStore = {
         contact_name: data.contactName || null,
         email: data.email || null,
         phone: data.phone || null,
+        country: data.country || null,
+        city: data.city || null,
+        address: data.address || null,
         notes: data.notes || null,
         active: data.active,
       })
@@ -608,6 +636,9 @@ export const partnersStore = {
         contact_name: data.contactName || null,
         email: data.email || null,
         phone: data.phone || null,
+        country: data.country || null,
+        city: data.city || null,
+        address: data.address || null,
         notes: data.notes || null,
         active: data.active,
       })
@@ -621,6 +652,31 @@ export const partnersStore = {
   async remove(id: string): Promise<void> {
     const { error } = await supabaseAdmin.from("weeggo_partners").delete().eq("id", id);
     assertNoError(error);
+  },
+
+  // Self-service subset for the partner portal's "Mi Perfil" — deliberately
+  // excludes active/notes, which stay admin-only (a partner shouldn't be
+  // able to reactivate their own deactivated account, and notes are an
+  // internal admin record about them, not theirs to edit).
+  async updateProfile(
+    id: string,
+    data: { name: string; contactName: string; phone: string; country: string; city: string; address: string }
+  ): Promise<Partner | undefined> {
+    const { data: row, error } = await supabaseAdmin
+      .from("weeggo_partners")
+      .update({
+        name: data.name,
+        contact_name: data.contactName || null,
+        phone: data.phone || null,
+        country: data.country || null,
+        city: data.city || null,
+        address: data.address || null,
+      })
+      .eq("id", id)
+      .select()
+      .maybeSingle();
+    assertNoError(error);
+    return row ? mapPartner(row as PartnerRow) : undefined;
   },
 };
 
@@ -682,6 +738,223 @@ export const emailLogStore = {
       .order("created_at", { ascending: false });
     assertNoError(error);
     return (data as EmailLogRow[]).map(mapLogEntry);
+  },
+};
+
+type WizardQuestionRow = {
+  id: string;
+  flow: WizardFlow;
+  step_key: string;
+  title: string;
+  subtitle: string | null;
+  placeholder: string | null;
+  category: WizardQuestionCategory;
+  question_type: WizardQuestionType;
+  required: boolean;
+  condition_step_key: string | null;
+  condition_operator: WizardConditionOperator | null;
+  condition_value: string | null;
+  sort_order: number;
+  status: WizardQuestionStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+type WizardOptionRow = {
+  id: string;
+  question_id: string;
+  value: string;
+  label: string;
+  sort_order: number;
+};
+
+function mapWizardQuestion(row: WizardQuestionRow, options: WizardOptionRow[]): WizardQuestion {
+  return {
+    id: row.id,
+    flow: row.flow,
+    stepKey: row.step_key,
+    title: row.title,
+    subtitle: row.subtitle ?? undefined,
+    placeholder: row.placeholder ?? undefined,
+    category: row.category,
+    questionType: row.question_type,
+    required: row.required,
+    condition: row.condition_step_key
+      ? {
+          stepKey: row.condition_step_key,
+          operator: row.condition_operator ?? "equals",
+          value: row.condition_value ?? "",
+        }
+      : undefined,
+    sortOrder: row.sort_order,
+    status: row.status,
+    options: options
+      .filter((o) => o.question_id === row.id)
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((o) => ({ id: o.id, value: o.value, label: o.label })),
+    createdAt: new Date(row.created_at).getTime(),
+    updatedAt: new Date(row.updated_at).getTime(),
+  };
+}
+
+export interface WizardQuestionInput {
+  stepKey: string;
+  title: string;
+  subtitle: string | null;
+  placeholder: string | null;
+  category: WizardQuestionCategory;
+  questionType: WizardQuestionType;
+  required: boolean;
+  status: WizardQuestionStatus;
+  conditionStepKey: string | null;
+  conditionOperator: WizardConditionOperator | null;
+  conditionValue: string | null;
+  options: { value: string; label: string }[];
+}
+
+async function replaceWizardOptions(questionId: string, options: { value: string; label: string }[]): Promise<void> {
+  const { error: deleteError } = await supabaseAdmin
+    .from("weeggo_wizard_options")
+    .delete()
+    .eq("question_id", questionId);
+  assertNoError(deleteError);
+
+  if (options.length === 0) return;
+
+  const { error: insertError } = await supabaseAdmin.from("weeggo_wizard_options").insert(
+    options.map((option, index) => ({
+      question_id: questionId,
+      value: option.value,
+      label: option.label,
+      sort_order: index,
+    }))
+  );
+  assertNoError(insertError);
+}
+
+export const wizardQuestionsStore = {
+  async list(flow: WizardFlow): Promise<WizardQuestion[]> {
+    const { data: questions, error } = await supabaseAdmin
+      .from("weeggo_wizard_questions")
+      .select("*")
+      .eq("flow", flow)
+      .order("sort_order", { ascending: true });
+    assertNoError(error);
+
+    const questionRows = (questions ?? []) as WizardQuestionRow[];
+    const ids = questionRows.map((q) => q.id);
+    if (ids.length === 0) return [];
+
+    const { data: options, error: optionsError } = await supabaseAdmin
+      .from("weeggo_wizard_options")
+      .select("*")
+      .in("question_id", ids);
+    assertNoError(optionsError);
+
+    return questionRows.map((row) => mapWizardQuestion(row, (options ?? []) as WizardOptionRow[]));
+  },
+
+  async get(id: string): Promise<WizardQuestion | undefined> {
+    const [{ data: question, error }, { data: options, error: optionsError }] = await Promise.all([
+      supabaseAdmin.from("weeggo_wizard_questions").select("*").eq("id", id).maybeSingle(),
+      supabaseAdmin.from("weeggo_wizard_options").select("*").eq("question_id", id),
+    ]);
+    assertNoError(error);
+    assertNoError(optionsError);
+    if (!question) return undefined;
+    return mapWizardQuestion(question as WizardQuestionRow, (options ?? []) as WizardOptionRow[]);
+  },
+
+  async create(flow: WizardFlow, data: WizardQuestionInput): Promise<WizardQuestion> {
+    const { data: existing, error: countError } = await supabaseAdmin
+      .from("weeggo_wizard_questions")
+      .select("sort_order")
+      .eq("flow", flow)
+      .order("sort_order", { ascending: false })
+      .limit(1);
+    assertNoError(countError);
+    const nextSortOrder = existing && existing.length > 0 ? (existing[0] as { sort_order: number }).sort_order + 1 : 0;
+
+    const { data: row, error } = await supabaseAdmin
+      .from("weeggo_wizard_questions")
+      .insert({
+        flow,
+        step_key: data.stepKey,
+        title: data.title,
+        subtitle: data.subtitle,
+        placeholder: data.placeholder,
+        category: data.category,
+        question_type: data.questionType,
+        required: data.required,
+        status: data.status,
+        condition_step_key: data.conditionStepKey,
+        condition_operator: data.conditionOperator,
+        condition_value: data.conditionValue,
+        sort_order: nextSortOrder,
+      })
+      .select()
+      .single();
+    assertNoError(error);
+
+    const question = row as WizardQuestionRow;
+    await replaceWizardOptions(question.id, data.options);
+    const created = await wizardQuestionsStore.get(question.id);
+    if (!created) throw new Error("No se pudo crear la pregunta.");
+    return created;
+  },
+
+  async update(id: string, data: WizardQuestionInput): Promise<WizardQuestion | undefined> {
+    const { data: row, error } = await supabaseAdmin
+      .from("weeggo_wizard_questions")
+      .update({
+        step_key: data.stepKey,
+        title: data.title,
+        subtitle: data.subtitle,
+        placeholder: data.placeholder,
+        category: data.category,
+        question_type: data.questionType,
+        required: data.required,
+        status: data.status,
+        condition_step_key: data.conditionStepKey,
+        condition_operator: data.conditionOperator,
+        condition_value: data.conditionValue,
+      })
+      .eq("id", id)
+      .select()
+      .maybeSingle();
+    assertNoError(error);
+    if (!row) return undefined;
+
+    await replaceWizardOptions(id, data.options);
+    return wizardQuestionsStore.get(id);
+  },
+
+  async remove(id: string): Promise<void> {
+    const { error } = await supabaseAdmin.from("weeggo_wizard_questions").delete().eq("id", id);
+    assertNoError(error);
+  },
+
+  async setStatus(id: string, status: WizardQuestionStatus): Promise<void> {
+    const { error } = await supabaseAdmin.from("weeggo_wizard_questions").update({ status }).eq("id", id);
+    assertNoError(error);
+  },
+
+  /** Swaps sort_order with the adjacent question (in the same flow) one step up or down — simple reordering, no drag-and-drop needed for a handful of questions per flow. */
+  async move(flow: WizardFlow, id: string, direction: "up" | "down"): Promise<void> {
+    const questions = await wizardQuestionsStore.list(flow);
+    const index = questions.findIndex((q) => q.id === id);
+    if (index === -1) return;
+
+    const swapIndex = direction === "up" ? index - 1 : index + 1;
+    if (swapIndex < 0 || swapIndex >= questions.length) return;
+
+    const current = questions[index];
+    const swapWith = questions[swapIndex];
+
+    await Promise.all([
+      supabaseAdmin.from("weeggo_wizard_questions").update({ sort_order: swapWith.sortOrder }).eq("id", current.id),
+      supabaseAdmin.from("weeggo_wizard_questions").update({ sort_order: current.sortOrder }).eq("id", swapWith.id),
+    ]);
   },
 };
 

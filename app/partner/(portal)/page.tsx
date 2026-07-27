@@ -1,9 +1,11 @@
+import Link from "next/link";
 import Image from "next/image";
-import { Star } from "lucide-react";
+import { Pencil, Plus, Star } from "lucide-react";
 
-import { getMyPartnerProperties } from "@/app/partner/_lib/queries";
+import { getMyLeadCountByProperty, getMyPartnerProperties } from "@/app/partner/_lib/queries";
 import { PageHeader } from "@/app/admin/_components/page-header";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -19,12 +21,30 @@ const statusVariant = {
   "off-market": "outline",
 } as const;
 
+const statusLabel = {
+  published: "Publicada",
+  draft: "Borrador",
+  "off-market": "Fuera de mercado",
+} as const;
+
 export default async function PartnerDashboardPage() {
-  const properties = await getMyPartnerProperties();
+  const [properties, leadCountByProperty] = await Promise.all([
+    getMyPartnerProperties(),
+    getMyLeadCountByProperty(),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Mis Propiedades" description={`${properties.length} propiedades asociadas`} />
+      <PageHeader
+        title="Mis Propiedades"
+        description={`${properties.length} propiedades asociadas`}
+        action={
+          <Button render={<Link href="/partner/properties/new" />}>
+            <Plus />
+            Nueva propiedad
+          </Button>
+        }
+      />
 
       {properties.length === 0 ? (
         <p className="text-sm text-muted-foreground">
@@ -41,6 +61,8 @@ export default async function PartnerDashboardPage() {
                 <TableHead>Precio</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead>Destacada</TableHead>
+                <TableHead>Consultas</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -63,10 +85,22 @@ export default async function PartnerDashboardPage() {
                     {property.currency} {property.price.toLocaleString()}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={statusVariant[property.status]}>{property.status}</Badge>
+                    <Badge variant={statusVariant[property.status]}>{statusLabel[property.status]}</Badge>
                   </TableCell>
                   <TableCell>
                     {property.featured && <Star className="size-4 text-accent" fill="currentColor" />}
+                  </TableCell>
+                  <TableCell className="font-weeggo-mono text-muted-foreground">
+                    {leadCountByProperty.get(property.id) ?? 0}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      render={<Link href={`/partner/properties/${property.id}`} />}
+                    >
+                      <Pencil />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

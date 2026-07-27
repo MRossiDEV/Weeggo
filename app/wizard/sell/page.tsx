@@ -1,46 +1,10 @@
-"use client"
-
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
-
-import Wizard from "../components/Wizard"
 import { sellerOnboarding } from "../data/sellerOnboarding"
-import { mapSellerAnswersToLead } from "../lib/seller-answers-to-lead"
-import { submitSellerLead } from "../actions"
-import { useDiscover } from "@/lib/discover/filters-context"
-import { useTranslation } from "@/lib/i18n/useTranslation"
-import type { WizardAnswer } from "../types"
+import { getWizardQuestions } from "../lib/load-questions"
+import { withQuestions } from "../lib/build-config"
+import SellWizardClient from "./SellWizardClient"
 
-export default function SellWizardPage() {
-  const router = useRouter()
-  const { visitorName } = useDiscover()
-  const { t } = useTranslation()
+export default async function SellWizardPage() {
+  const questions = await getWizardQuestions("seller")
 
-  async function handleFinish(summary: Record<string, WizardAnswer>) {
-    const { contact, property } = mapSellerAnswersToLead(summary)
-    const result = await submitSellerLead(contact, property)
-
-    if (!result.ok) {
-      toast.error(t("sell.errorToast"))
-    }
-  }
-
-  return (
-    <Wizard
-      config={sellerOnboarding}
-      collectNameOnIntro={false}
-      progressLabel={t("sell.progressLabel")}
-      onFinish={handleFinish}
-      processingMessage={(_, name) =>
-        name ? t("sell.sendingWithName", { name }) : t("sell.sendingGeneric")
-      }
-      completion={{
-        heading: visitorName ? t("sell.thankYouWithName", { name: visitorName }) : t("sell.thankYouGeneric"),
-        body: t("sell.completionBody"),
-        ctaLabel: t("sell.backToHome"),
-        onCta: () => router.push("/"),
-        showRestart: false,
-      }}
-    />
-  )
+  return <SellWizardClient config={withQuestions(sellerOnboarding, questions)} />
 }

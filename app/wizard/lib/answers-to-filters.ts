@@ -2,14 +2,6 @@ import { createEmptyFilters, type Filters, type Mode } from "@/lib/discover/type
 import type { PropertyType } from "@/app/admin/_lib/types";
 import type { WizardAnswer } from "../types";
 
-const PURCHASE_BUDGET_BUCKET_MAX: Record<string, number> = {
-  "300k": 300_000,
-  "600k": 600_000,
-  "1m": 1_000_000,
-  "3m": 3_000_000,
-  "3m_plus": 5_000_000,
-};
-
 const VALID_PROPERTY_TYPES: PropertyType[] = ["apartment", "house", "ph", "loft"];
 
 function multiValue(answers: Record<string, WizardAnswer>, id: string): string[] {
@@ -38,9 +30,9 @@ export function mapWizardAnswersToFilters(
   const minBeds = bedsAnswer ? Number(bedsAnswer) || 0 : 0;
 
   // Budget is asked as one of two mutually-exclusive conditional steps
-  // (buyerAssessment.ts only shows one, based on intent), each already
-  // reporting its own USD max — purchase buckets need a lookup, rent
-  // buckets are the max itself.
+  // (only one shows, based on intent — see weeggo_wizard_questions'
+  // condition_step_key) — both report the USD max directly as the option's
+  // value (an admin-editable row, not a hardcoded bucket lookup).
   const purchaseBucket = answers.budget_purchase?.value as string | undefined;
   const rentBucket = answers.budget_rent?.value as string | undefined;
   const budgetMax =
@@ -49,7 +41,7 @@ export function mapWizardAnswersToFilters(
         ? Number(rentBucket) || null
         : null
       : purchaseBucket
-        ? (PURCHASE_BUDGET_BUCKET_MAX[purchaseBucket] ?? null)
+        ? Number(purchaseBucket) || null
         : null;
 
   const targetYieldAnswer = answers.target_yield?.value as string | undefined;

@@ -6,10 +6,11 @@ import { useDiscover } from "@/lib/discover/filters-context";
 import { fmtUSD, propertyTypeLabel } from "@/lib/discover/scoring";
 import { LIFESTYLES } from "@/lib/discover/constants";
 import { useTranslation, type TranslationKey } from "@/lib/i18n/useTranslation";
+import { AlertsSection } from "@/components/discover/AlertsSection";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { mode, filters, liked, passed, reset, visitorName } = useDiscover();
+  const { mode, filters, liked, passed, reset, visitorName, openFilterPanel } = useDiscover();
   const { t } = useTranslation();
   const initials = visitorName ? visitorName.slice(0, 2).toUpperCase() : "GE";
 
@@ -59,7 +60,7 @@ export default function ProfilePage() {
       <ProfileRow label={t("profile.amenities")} value={amenitiesLabel} />
       <button
         type="button"
-        onClick={() => router.push("/wizard")}
+        onClick={openFilterPanel}
         className="mt-3.5 w-full rounded-[var(--weeggo-radius-md)] py-[13px] text-[13.5px] font-bold text-white"
         style={{ background: "var(--weeggo-blue)" }}
       >
@@ -69,6 +70,8 @@ export default function ProfilePage() {
       <SectionTitle>{t("profile.activity")}</SectionTitle>
       <ProfileRow label={t("profile.shortlisted")} value={String(liked.length)} />
       <ProfileRow label={t("profile.passed")} value={String(passed.length)} />
+
+      <AlertsSection />
 
       <button
         type="button"

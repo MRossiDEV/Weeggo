@@ -15,6 +15,9 @@ function parsePartnerForm(formData: FormData) {
   const contactName = String(formData.get("contactName") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
+  const country = String(formData.get("country") ?? "").trim() || "Uruguay";
+  const city = String(formData.get("city") ?? "").trim();
+  const address = String(formData.get("address") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim();
   const active = formData.get("active") === "on";
 
@@ -22,7 +25,7 @@ function parsePartnerForm(formData: FormData) {
     return { error: "Completá nombre y email del partner." } as const;
   }
 
-  return { data: { name, contactName, email, phone, notes, active } } as const;
+  return { data: { name, contactName, email, phone, country, city, address, notes, active } } as const;
 }
 
 export async function createPartnerAction(

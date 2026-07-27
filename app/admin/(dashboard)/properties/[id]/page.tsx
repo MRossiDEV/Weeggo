@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { agentsStore, partnersStore, propertiesStore } from "@/app/admin/_lib/store";
 import { updatePropertyAction } from "@/app/admin/_lib/actions/properties";
 import { PageHeader } from "@/app/admin/_components/page-header";
-import { PropertyForm } from "@/app/admin/(dashboard)/properties/_components/property-form";
+import { PropertyFormWithPreview } from "@/app/admin/(dashboard)/properties/_components/property-form-with-preview";
 
 export default async function EditPropertyPage({
   params,
@@ -21,7 +21,7 @@ export default async function EditPropertyPage({
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={property.title} description="Editá los detalles de la propiedad." />
-      <PropertyForm
+      <PropertyFormWithPreview
         action={updatePropertyAction.bind(null, id)}
         property={property}
         agents={agents.filter((a) => a.active || a.id === property.agentId)}

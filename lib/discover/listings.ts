@@ -8,6 +8,8 @@ type PublishedPropertyRow = {
   id: string;
   title: string;
   city: string;
+  locality: string | null;
+  department: string | null;
   description: string;
   price: number;
   rent_price: number | null;
@@ -38,7 +40,7 @@ export const getPublishedListings = cache(async (): Promise<Listing[]> => {
       supabasePublic
         .from("weeggo_properties")
         .select(
-          "id, title, city, description, price, rent_price, bedrooms, bathrooms, area_m2, property_type, tags, cover_image_url, badges, featured"
+          "id, title, city, locality, department, description, price, rent_price, bedrooms, bathrooms, area_m2, property_type, tags, cover_image_url, badges, featured"
         )
         .eq("status", "published")
         .order("featured", { ascending: false })
@@ -63,6 +65,8 @@ export const getPublishedListings = cache(async (): Promise<Listing[]> => {
     id: row.id,
     title: row.title,
     city: row.city,
+    locality: row.locality,
+    department: row.department,
     description: row.description,
     price: Number(row.price),
     rentPrice: row.rent_price === null ? null : Number(row.rent_price),

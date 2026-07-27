@@ -77,3 +77,44 @@ self.addEventListener("fetch", (event) => {
       .catch(() => caches.match(event.request))
   );
 });
+
+// Saved-search alerts (see lib/notifications/match.ts), sent as a Web Push
+// message with a JSON payload of { title, body, url }.
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
+
+  let payload;
+  try {
+    payload = event.data.json();
+  } catch {
+    payload = { title: "WEEGGO", body: event.data.text() };
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(payload.title || "WEEGGO", {
+      body: payload.body,
+      icon: "/icon-192.png",
+      badge: "/icon-192.png",
+      data: { url: payload.url || "/" },
+    })
+  );
+});
+
+// Tapping the notification opens (or focuses) the mini swipe session for the
+// new match(es) instead of just launching the app to whatever tab was last open.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const targetUrl = event.notification.data && event.notification.data.url ? event.notification.data.url : "/";
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if ("focus" in client) {
+          client.navigate(targetUrl);
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(targetUrl);
+    })
+  );
+});

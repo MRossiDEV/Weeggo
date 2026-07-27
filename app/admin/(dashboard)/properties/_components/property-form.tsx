@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Plus, X } from "lucide-react";
 
 import type { Agent, Partner, Property, PropertyStatus, PropertyType } from "@/app/admin/_lib/types";
-import type { PropertyFormState } from "@/app/admin/_lib/actions/properties";
+import type { PropertyFormState } from "@/app/admin/_lib/property-form-parser";
+import { buildPropertyPreview, type PropertyPreviewData } from "@/app/admin/_lib/property-preview";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -41,14 +42,46 @@ export function PropertyForm({
   property,
   agents,
   partners,
+  variant = "admin",
+  backHref = "/admin/properties",
+  backLabel = "Volver a Propiedades",
+  onPreviewChange,
 }: {
   action: (state: PropertyFormState, formData: FormData) => Promise<PropertyFormState>;
   property?: Property;
-  agents: Agent[];
-  partners: Partner[];
+  /** Only needed for variant="admin" — the partner variant never shows these assignment selects. */
+  agents?: Agent[];
+  partners?: Partner[];
+  /**
+   * "partner" hides the fields that control publish state or internal
+   * assignment (Estado, Destacada, Agente, Partner) — a partner submitting
+   * or editing their own listing shouldn't be able to self-publish, promote,
+   * or reassign it. The server action enforces this too; hiding the fields
+   * is about not implying partners have that control, not the actual
+   * security boundary.
+   */
+  variant?: "admin" | "partner";
+  backHref?: string;
+  backLabel?: string;
+  /** Fires on every field change with a lenient, always-displayable snapshot — for a live preview panel rendered alongside this form. */
+  onPreviewChange?: (data: PropertyPreviewData) => void;
 }) {
   const [state, formAction, pending] = useActionState(action, {});
   const [galleryUrls, setGalleryUrls] = useState<string[]>(property?.images ?? []);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  function emitPreview() {
+    if (formRef.current) {
+      onPreviewChange?.(buildPropertyPreview(new FormData(formRef.current)));
+    }
+  }
+
+  // Initial snapshot on mount (so the preview shows existing values when
+  // editing, not just once the admin/partner touches a field) and whenever
+  // the gallery list changes — those inputs are added/removed via buttons,
+  // not typed into, so they don't reliably fire the form's own onChange.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(emitPreview, [galleryUrls]);
 
   // Base UI's <Select.Value> only shows the matched item's *label* when the
   // root is given an explicit `items` map — without it, it falls back to
@@ -60,21 +93,21 @@ export function PropertyForm({
   const statusItems = Object.fromEntries(statusOptions.map((o) => [o.value, o.label]));
   const agentItems = {
     none: "Sin asignar",
-    ...Object.fromEntries(agents.map((agent) => [agent.id, agent.name])),
+    ...Object.fromEntries((agents ?? []).map((agent) => [agent.id, agent.name])),
   };
   const partnerItems = {
     none: "Directo / sin partner",
-    ...Object.fromEntries(partners.map((partner) => [partner.id, partner.name])),
+    ...Object.fromEntries((partners ?? []).map((partner) => [partner.id, partner.name])),
   };
 
   return (
-    <form action={formAction} className="flex flex-col gap-6">
+    <form ref={formRef} action={formAction} onChange={emitPreview} className="flex flex-col gap-6">
       <Link
-        href="/admin/properties"
+        href={backHref}
         className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
-        Volver a Propiedades
+        {backLabel}
       </Link>
 
       <FieldGroup className="max-w-2xl rounded-xl border border-border bg-card p-6">
@@ -313,75 +346,86 @@ export function PropertyForm({
           </FieldContent>
         </Field>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field>
-            <FieldLabel htmlFor="status">Estado</FieldLabel>
-            <FieldContent>
-              <Select name="status" items={statusItems} defaultValue={property?.status ?? "draft"}>
-                <SelectTrigger id="status" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {statusOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FieldContent>
-          </Field>
+        {variant === "admin" && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field>
+              <FieldLabel htmlFor="status">Estado</FieldLabel>
+              <FieldContent>
+                <Select name="status" items={statusItems} defaultValue={property?.status ?? "draft"}>
+                  <SelectTrigger id="status" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {statusOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FieldContent>
+            </Field>
 
-          <Field orientation="horizontal">
-            <FieldContent>
-              <FieldLabel htmlFor="featured">Destacada en portada</FieldLabel>
-            </FieldContent>
-            <Switch id="featured" name="featured" defaultChecked={property?.featured} />
-          </Field>
-        </div>
+            <Field orientation="horizontal">
+              <FieldContent>
+                <FieldLabel htmlFor="featured">Destacada en portada</FieldLabel>
+              </FieldContent>
+              <Switch id="featured" name="featured" defaultChecked={property?.featured} />
+            </Field>
+          </div>
+        )}
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field>
-            <FieldLabel htmlFor="agentId">Agente asignado</FieldLabel>
-            <FieldContent>
-              <Select name="agentId" items={agentItems} defaultValue={property?.agentId ?? "none"}>
-                <SelectTrigger id="agentId" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Sin asignar</SelectItem>
-                  {agents.map((agent) => (
-                    <SelectItem key={agent.id} value={agent.id}>
-                      {agent.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FieldContent>
-          </Field>
+        {variant === "admin" && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field>
+              <FieldLabel htmlFor="agentId">Agente asignado</FieldLabel>
+              <FieldContent>
+                <Select name="agentId" items={agentItems} defaultValue={property?.agentId ?? "none"}>
+                  <SelectTrigger id="agentId" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sin asignar</SelectItem>
+                    {(agents ?? []).map((agent) => (
+                      <SelectItem key={agent.id} value={agent.id}>
+                        {agent.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FieldContent>
+            </Field>
 
-          <Field>
-            <FieldLabel htmlFor="partnerId">Partner / realtor (lado vendedor)</FieldLabel>
-            <FieldContent>
-              <Select name="partnerId" items={partnerItems} defaultValue={property?.partnerId ?? "none"}>
-                <SelectTrigger id="partnerId" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Directo / sin partner</SelectItem>
-                  {partners.map((partner) => (
-                    <SelectItem key={partner.id} value={partner.id}>
-                      {partner.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FieldDescription>
-                La inmobiliaria o realtor externo del que vino esta propiedad, si corresponde.
-              </FieldDescription>
-            </FieldContent>
-          </Field>
-        </div>
+            <Field>
+              <FieldLabel htmlFor="partnerId">Partner / realtor (lado vendedor)</FieldLabel>
+              <FieldContent>
+                <Select name="partnerId" items={partnerItems} defaultValue={property?.partnerId ?? "none"}>
+                  <SelectTrigger id="partnerId" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Directo / sin partner</SelectItem>
+                    {(partners ?? []).map((partner) => (
+                      <SelectItem key={partner.id} value={partner.id}>
+                        {partner.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FieldDescription>
+                  La inmobiliaria o realtor externo del que vino esta propiedad, si corresponde.
+                </FieldDescription>
+              </FieldContent>
+            </Field>
+          </div>
+        )}
+
+        {variant === "partner" && (
+          <p className="text-xs text-muted-foreground">
+            Tu propiedad queda como borrador hasta que un administrador la revise y publique. No podés
+            cambiar su estado ni destacarla vos mismo.
+          </p>
+        )}
 
         {state.error && <FieldError>{state.error}</FieldError>}
 

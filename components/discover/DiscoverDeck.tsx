@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Heart, SlidersHorizontal, Sparkles, Star, X } from "lucide-react";
 
 import { useDiscover } from "@/lib/discover/filters-context";
@@ -16,9 +15,9 @@ import { MatchCelebration } from "./MatchCelebration";
 const MATCH_THRESHOLD = 90;
 
 export function DiscoverDeck({ listings }: { listings: Listing[] }) {
-  const router = useRouter();
   const { t } = useTranslation();
-  const { mode, filters, liked, passed, like, superlike, pass, openListing } = useDiscover();
+  const { mode, filters, liked, passed, like, superlike, pass, openListing, openFilterPanel, resetSeen } =
+    useDiscover();
   const [pendingAction, setPendingAction] = useState<SwipeAction | null>(null);
   const [matchListing, setMatchListing] = useState<Listing | null>(null);
 
@@ -50,7 +49,7 @@ export function DiscoverDeck({ listings }: { listings: Listing[] }) {
   const filterPill = (
     <button
       type="button"
-      onClick={() => router.push("/wizard")}
+      onClick={openFilterPanel}
       className="absolute right-4 top-3.5 z-20 flex items-center gap-1.5 rounded-full bg-[rgba(24,24,27,0.82)] px-3.5 py-2.5 text-xs font-bold text-white backdrop-blur-sm"
     >
       <SlidersHorizontal className="size-3.5" />
@@ -79,11 +78,11 @@ export function DiscoverDeck({ listings }: { listings: Listing[] }) {
           </p>
           <button
             type="button"
-            onClick={() => router.push("/wizard")}
+            onClick={resetSeen}
             className="rounded-[var(--weeggo-radius-md)] px-[22px] py-[13px] text-[13.5px] font-bold text-white"
             style={{ background: "var(--weeggo-blue)" }}
           >
-            {t("discover.adjustFilters")}
+            {t("discover.resetSeen")}
           </button>
         </div>
 

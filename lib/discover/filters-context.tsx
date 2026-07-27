@@ -70,6 +70,7 @@ type Action =
   | { type: "SET_VISITOR_NAME"; name: string }
   | { type: "SET_LOCALE"; locale: Locale }
   | { type: "RESET" }
+  | { type: "RESET_SEEN" }
   | { type: "HYDRATE"; state: Partial<PersistedState> | null };
 
 /**
@@ -163,6 +164,15 @@ function reducer(state: DiscoverState, action: Action): DiscoverState {
       // to the default language.
       return { ...initialPersistedState, locale: state.locale, hydrated: true };
 
+    case "RESET_SEEN":
+      // Clears swipe history only — filters, mode, and onboarding stay put,
+      // unlike RESET. This is the fix for the deck's empty state: once a
+      // visitor has liked/passed every listing that matches their filters,
+      // no amount of adjusting filters brings a card back (buildDeck already
+      // relaxes every filter to nothing before giving up), so the only real
+      // way out is to let them see their swiped listings again.
+      return { ...state, liked: [], superliked: [], passed: [], compareSelection: [] };
+
     case "HYDRATE":
       return { ...mergePersistedState(action.state), hydrated: true };
 
@@ -187,6 +197,7 @@ interface DiscoverContextValue extends DiscoverState {
   setVisitorName: (name: string) => void;
   setLocale: (locale: Locale) => void;
   reset: () => void;
+  resetSeen: () => void;
 
   // Ephemeral UI state — not persisted, so a page refresh always starts closed.
   activeListingId: string | null;
@@ -195,6 +206,9 @@ interface DiscoverContextValue extends DiscoverState {
   compareOpen: boolean;
   openCompare: () => void;
   closeCompare: () => void;
+  filterPanelOpen: boolean;
+  openFilterPanel: () => void;
+  closeFilterPanel: () => void;
 }
 
 const DiscoverContext = createContext<DiscoverContextValue | null>(null);
@@ -204,6 +218,7 @@ export function DiscoverProvider({ children }: { children: ReactNode }) {
 
   const [activeListingId, setActiveListingId] = useState<string | null>(null);
   const [compareOpen, setCompareOpen] = useState(false);
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -249,6 +264,7 @@ export function DiscoverProvider({ children }: { children: ReactNode }) {
       setVisitorName: (name) => dispatch({ type: "SET_VISITOR_NAME", name }),
       setLocale: (locale) => dispatch({ type: "SET_LOCALE", locale }),
       reset: () => dispatch({ type: "RESET" }),
+      resetSeen: () => dispatch({ type: "RESET_SEEN" }),
 
       activeListingId,
       openListing: (id) => setActiveListingId(id),
@@ -256,8 +272,11 @@ export function DiscoverProvider({ children }: { children: ReactNode }) {
       compareOpen,
       openCompare: () => setCompareOpen(true),
       closeCompare: () => setCompareOpen(false),
+      filterPanelOpen,
+      openFilterPanel: () => setFilterPanelOpen(true),
+      closeFilterPanel: () => setFilterPanelOpen(false),
     }),
-    [state, activeListingId, compareOpen]
+    [state, activeListingId, compareOpen, filterPanelOpen]
   );
 
   return <DiscoverContext.Provider value={value}>{children}</DiscoverContext.Provider>;

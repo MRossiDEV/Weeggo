@@ -26,14 +26,17 @@ import {
 import { mapWizardAnswersToFilters } from "../lib/answers-to-filters"
 import { formatAnswerAsMessage } from "../lib/answer-to-message"
 import { useDiscover, type Locale } from "@/lib/discover/filters-context"
+import { buildDeck } from "@/lib/discover/deck"
 import { useTranslation, type TranslationKey } from "@/lib/i18n/useTranslation"
 import { localizeConfig } from "@/lib/i18n/wizard-content"
+import MatchPreviewCard from "./MatchPreviewCard"
 
 import type {
   WizardConfig,
   QuestionStep,
   WizardAnswer
 } from "../types"
+import type { Listing } from "@/lib/discover/types"
 
 type T = (key: TranslationKey, vars?: Record<string, string | number>) => string
 
@@ -184,6 +187,14 @@ interface WizardProps {
   /** Overrides the "Tu búsqueda" progress-bar label. */
   progressLabel?: string
 
+  /**
+   * The published catalog, used to preview the #1 curated match right on
+   * the completion screen (see MatchPreviewCard) — omitted entirely by
+   * flows with nothing to match against (e.g. the seller flow), which just
+   * never renders a preview.
+   */
+  listings?: Listing[]
+
 }
 
 type MessagePhase = "typing" | "message" | "action"
@@ -207,7 +218,8 @@ export default function Wizard({
   processingMessage,
   completion,
   collectNameOnIntro = true,
-  progressLabel
+  progressLabel,
+  listings
 }: WizardProps) {
   const router = useRouter()
   const { setMode, setFilters, completeOnboarding, visitorName, setVisitorName } = useDiscover()
@@ -244,6 +256,17 @@ export default function Wizard({
     // configs with no such question — it just sits unused in the answers map.
     visitorName ? { full_name: visitorName } : undefined
   )
+
+  // The #1 curated match for the completion screen's preview card — the
+  // exact same buildDeck() call /selection makes, so the card shown here is
+  // guaranteed to be whatever "Ver mi selección" actually opens on first.
+  // Flows with no listings (the seller flow) simply never get a topMatch.
+  const topMatch = useMemo<{ listing: Listing; mode: ReturnType<typeof mapWizardAnswersToFilters>["mode"] } | null>(() => {
+    if (!listings || listings.length === 0) return null
+    const { mode, filters } = mapWizardAnswersToFilters(answers)
+    const listing = buildDeck(listings, filters, mode, []).deck[0]
+    return listing ? { listing, mode } : null
+  }, [listings, answers])
 
   // Name is captured right on the welcome screen (unless collectNameOnIntro
   // is false, e.g. the seller flow asks for it later as a regular
@@ -688,12 +711,17 @@ export default function Wizard({
                 {phase === "typing" ? (
                   <TypingBubble />
                 ) : (
-                  <AssistantMessage
-                    key={currentStepData.id}
-                    text={`${completion?.heading ?? defaultCompletionHeading} ${completion?.body ?? buildCompletionBody(answers, t)}`}
-                    typewriter={phase === "message"}
-                    onTypingDone={handleTypingDone}
-                  />
+                  <>
+                    <AssistantMessage
+                      key={currentStepData.id}
+                      text={`${completion?.heading ?? defaultCompletionHeading} ${completion?.body ?? buildCompletionBody(answers, t)}`}
+                      typewriter={phase === "message"}
+                      onTypingDone={handleTypingDone}
+                    />
+                    {topMatch && (
+                      <MatchPreviewCard listing={topMatch.listing} mode={topMatch.mode} t={t} />
+                    )}
+                  </>
                 )}
               </div>
             )}

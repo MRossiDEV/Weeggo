@@ -86,6 +86,7 @@ export interface Dictionary {
     emptyBody1: string;
     emptyBody2: string;
     adjustFilters: string;
+    resetSeen: string;
     passAria: string;
     topPickAria: string;
     shortlistAria: string;
@@ -96,6 +97,7 @@ export interface Dictionary {
     yieldLabel: string;
     grossYieldLabel: string;
     bedsLabel: string;
+    bathsLabel: string;
     matchLabel: string;
     rentOnRequest: string;
     perMonth: string;
@@ -122,6 +124,64 @@ export interface Dictionary {
     selectionGeneric: string;
     selectionCount: string;
     skipToExplore: string;
+  };
+
+  filterPanel: {
+    title: string;
+    subtitle: string;
+    neighborhoods: string;
+    propertyType: string;
+    budgetBuy: string;
+    budgetRent: string;
+    noLimit: string;
+    minBeds: string;
+    minBaths: string;
+    any: string;
+    amenities: string;
+    amenitiesRequiredLabel: string;
+    parking: string;
+    parkingAny: string;
+    parkingPreferred: string;
+    parkingRequired: string;
+    targetYield: string;
+    targetYieldAny: string;
+    clear: string;
+    applyLabel: string;
+    saveSearch: string;
+  };
+
+  saveSearch: {
+    title: string;
+    subtitle: string;
+    emailLabel: string;
+    emailPlaceholder: string;
+    pushLabel: string;
+    save: string;
+    saving: string;
+    success: string;
+    error: string;
+  };
+
+  matches: {
+    title: string;
+    subtitle: string;
+    doneTitle: string;
+    doneBody: string;
+    backToDiscover: string;
+  };
+
+  alerts: {
+    title: string;
+    pushToggle: string;
+    pushDenied: string;
+    noSearches: string;
+    searchActive: string;
+    deleteSearch: string;
+    categoriesTitle: string;
+    categoryNewMatch: string;
+    categoryPriceDrop: string;
+    categoryStatusChange: string;
+    categoryDigest: string;
   };
 
   viewingForm: {
@@ -264,6 +324,7 @@ const es: Dictionary = {
     emptyBody1: "Ya viste todas las propiedades que tenemos — incluso fuera de tus filtros.",
     emptyBody2: "Mirá tus favoritos o volvé más tarde por nuevas propiedades.",
     adjustFilters: "Ajustar filtros",
+    resetSeen: "Ver todo de nuevo",
     passAria: "Descartar",
     topPickAria: "Favorito top",
     shortlistAria: "Favoritos",
@@ -274,6 +335,7 @@ const es: Dictionary = {
     yieldLabel: "{pct}% rentab.",
     grossYieldLabel: "{pct}% rentab. bruta",
     bedsLabel: "{n} dorm.",
+    bathsLabel: "{n} baños",
     matchLabel: "{pct}% afinidad",
     rentOnRequest: "Alquiler a consultar",
     perMonth: "/mes",
@@ -300,6 +362,64 @@ const es: Dictionary = {
     selectionGeneric: "Tu selección curada",
     selectionCount: "{count} de {total}",
     skipToExplore: "Saltar a explorar todo",
+  },
+
+  filterPanel: {
+    title: "Filtros",
+    subtitle: "Ajustá tu búsqueda cuando quieras — sin pasar por el asistente de nuevo.",
+    neighborhoods: "Barrios",
+    propertyType: "Tipo de propiedad",
+    budgetBuy: "Precio máximo",
+    budgetRent: "Alquiler máximo",
+    noLimit: "Sin límite",
+    minBeds: "Dormitorios mínimos",
+    minBaths: "Baños mínimos",
+    any: "Cualquiera",
+    amenities: "Comodidades",
+    amenitiesRequiredLabel: "Deben tener todas",
+    parking: "Cochera",
+    parkingAny: "No importa",
+    parkingPreferred: "Preferida",
+    parkingRequired: "Imprescindible",
+    targetYield: "Rentabilidad mínima",
+    targetYieldAny: "Sin mínimo",
+    clear: "Limpiar filtros",
+    applyLabel: "Ver {n} propiedades",
+    saveSearch: "Guardar búsqueda y recibir alertas",
+  },
+
+  saveSearch: {
+    title: "Guardar esta búsqueda",
+    subtitle: "Te avisamos cuando aparezca una propiedad nueva que coincida con estos filtros.",
+    emailLabel: "Email (opcional)",
+    emailPlaceholder: "tu@email.com",
+    pushLabel: "Avisarme también con notificaciones push",
+    save: "Guardar búsqueda",
+    saving: "Guardando…",
+    success: "¡Listo! Te avisamos ante nuevos matches.",
+    error: "No pudimos guardar tu búsqueda — intentá de nuevo.",
+  },
+
+  matches: {
+    title: "Nuevos matches",
+    subtitle: "Propiedades nuevas que coinciden con tu búsqueda guardada.",
+    doneTitle: "¡Eso es todo!",
+    doneBody: "Ya viste los nuevos matches de esta alerta.",
+    backToDiscover: "Volver a explorar",
+  },
+
+  alerts: {
+    title: "Alertas",
+    pushToggle: "Notificaciones push en este dispositivo",
+    pushDenied: "No pudimos activar las notificaciones — revisá los permisos del navegador.",
+    noSearches: "Todavía no guardaste ninguna búsqueda. Guardá una desde los filtros para recibir alertas.",
+    searchActive: "Activa",
+    deleteSearch: "Eliminar búsqueda guardada",
+    categoriesTitle: "Qué querés recibir",
+    categoryNewMatch: "Nuevos matches",
+    categoryPriceDrop: "Bajas de precio en favoritos",
+    categoryStatusChange: "Cambios de estado en favoritos",
+    categoryDigest: "Resumen semanal",
   },
 
   viewingForm: {
@@ -441,6 +561,7 @@ const en: Dictionary = {
     emptyBody1: "You've seen every place we have — even outside your filters.",
     emptyBody2: "Check your shortlist or come back later for new listings.",
     adjustFilters: "Adjust filters",
+    resetSeen: "See everything again",
     passAria: "Pass",
     topPickAria: "Top pick",
     shortlistAria: "Shortlist",
@@ -451,6 +572,7 @@ const en: Dictionary = {
     yieldLabel: "{pct}% yield",
     grossYieldLabel: "{pct}% gross yield",
     bedsLabel: "{n} bed",
+    bathsLabel: "{n} bath",
     matchLabel: "{pct}% match",
     rentOnRequest: "Rent on request",
     perMonth: "/mo",
@@ -477,6 +599,64 @@ const en: Dictionary = {
     selectionGeneric: "Your curated selection",
     selectionCount: "{count} of {total}",
     skipToExplore: "Skip to explore everything",
+  },
+
+  filterPanel: {
+    title: "Filters",
+    subtitle: "Adjust your search anytime — no need to go through the assistant again.",
+    neighborhoods: "Neighborhoods",
+    propertyType: "Property type",
+    budgetBuy: "Max price",
+    budgetRent: "Max rent",
+    noLimit: "No limit",
+    minBeds: "Min bedrooms",
+    minBaths: "Min bathrooms",
+    any: "Any",
+    amenities: "Amenities",
+    amenitiesRequiredLabel: "Must have all",
+    parking: "Parking",
+    parkingAny: "No preference",
+    parkingPreferred: "Preferred",
+    parkingRequired: "Required",
+    targetYield: "Min yield",
+    targetYieldAny: "No minimum",
+    clear: "Clear filters",
+    applyLabel: "Show {n} properties",
+    saveSearch: "Save this search & get alerts",
+  },
+
+  saveSearch: {
+    title: "Save this search",
+    subtitle: "We'll let you know when a new property matches these filters.",
+    emailLabel: "Email (optional)",
+    emailPlaceholder: "you@email.com",
+    pushLabel: "Also notify me with push notifications",
+    save: "Save search",
+    saving: "Saving…",
+    success: "Done! We'll alert you on new matches.",
+    error: "Couldn't save your search — try again.",
+  },
+
+  matches: {
+    title: "New matches",
+    subtitle: "New properties that match your saved search.",
+    doneTitle: "That's everything!",
+    doneBody: "You've seen every new match from this alert.",
+    backToDiscover: "Back to Discover",
+  },
+
+  alerts: {
+    title: "Alerts",
+    pushToggle: "Push notifications on this device",
+    pushDenied: "We couldn't enable notifications — check your browser permissions.",
+    noSearches: "You haven't saved a search yet. Save one from the filters to start getting alerts.",
+    searchActive: "Active",
+    deleteSearch: "Delete saved search",
+    categoriesTitle: "What you want to hear about",
+    categoryNewMatch: "New matches",
+    categoryPriceDrop: "Price drops on favorites",
+    categoryStatusChange: "Status changes on favorites",
+    categoryDigest: "Weekly digest",
   },
 
   viewingForm: {

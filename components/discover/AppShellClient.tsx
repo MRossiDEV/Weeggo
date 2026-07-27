@@ -10,6 +10,7 @@ import { AppHeader } from "./AppHeader";
 import { TabBar } from "./TabBar";
 import { PropertyDrawer } from "./PropertyDrawer";
 import { CompareDrawer } from "./CompareDrawer";
+import { FilterPanel } from "./FilterPanel";
 
 // DiscoverProvider now wraps the whole app from the root layout (not just
 // this group) — /landing, /wizard, and /selection all read/write the same
@@ -42,6 +43,7 @@ export function AppShellClient({ listings, children }: { listings: Listing[]; ch
       <TabBar />
       <PropertyDrawer listings={listings} />
       <CompareDrawer listings={listings} />
+      <FilterPanel listings={listings} />
     </div>
   );
 }

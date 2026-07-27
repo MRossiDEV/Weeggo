@@ -54,6 +54,7 @@ export interface Lead {
   assessment?: Record<string, WizardAnswerValue>;
   status: LeadStatus;
   assignedAgentId?: string;
+  propertyId?: string;
   createdAt: number;
 }
 
@@ -79,6 +80,10 @@ export interface Partner {
   contactName?: string;
   email?: string;
   phone?: string;
+  /** Where the partner agency is based — informational only. Defaults to "Uruguay". */
+  country?: string;
+  city?: string;
+  address?: string;
   notes?: string;
   active: boolean;
   /** Has completed their invite (set a password) and can actually log in to the partner portal. */
@@ -112,4 +117,65 @@ export interface SiteSettings {
   instagramUrl: string;
   facebookUrl: string;
   defaultSeoDescription: string;
+}
+
+export type WizardFlow = "buyer" | "seller";
+
+export type WizardQuestionType =
+  | "single"
+  | "multiple"
+  | "text"
+  | "email"
+  | "phone"
+  | "number"
+  | "range"
+  | "select"
+  | "location"
+  | "currency";
+
+export type WizardQuestionCategory =
+  | "profile"
+  | "contact"
+  | "situation"
+  | "property"
+  | "lifestyle"
+  | "location"
+  | "financial"
+  | "timeline"
+  | "additional";
+
+export type WizardConditionOperator = "equals" | "not_equals" | "contains" | "greater_than" | "less_than";
+
+export type WizardQuestionStatus = "draft" | "published";
+
+export interface WizardQuestionOption {
+  id: string;
+  value: string;
+  label: string;
+}
+
+export interface WizardQuestionCondition {
+  stepKey: string;
+  operator: WizardConditionOperator;
+  value: string;
+}
+
+/** An admin-editable question in the buyer or seller wizard assistant — see app/wizard/lib/load-questions.ts for the public-facing read path. */
+export interface WizardQuestion {
+  id: string;
+  flow: WizardFlow;
+  /** Stable id the rest of the app reads by (filter mapping, lead mapping, conditions) — see the migration's comment on weeggo_wizard_questions.step_key. */
+  stepKey: string;
+  title: string;
+  subtitle?: string;
+  placeholder?: string;
+  category: WizardQuestionCategory;
+  questionType: WizardQuestionType;
+  required: boolean;
+  condition?: WizardQuestionCondition;
+  sortOrder: number;
+  status: WizardQuestionStatus;
+  options: WizardQuestionOption[];
+  createdAt: number;
+  updatedAt: number;
 }

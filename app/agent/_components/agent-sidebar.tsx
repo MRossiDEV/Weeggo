@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Building2, LayoutDashboard, LogOut, User, Users } from "lucide-react";
 
@@ -16,6 +17,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Badge } from "@/components/ui/badge";
 import { signOutAgentAction } from "@/app/agent/_lib/actions/auth";
 
 const navItems = [
@@ -31,11 +33,23 @@ export function AgentSidebar({ agentName }: { agentName: string }) {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <Link href="/agent" className="flex items-center gap-2 px-2 py-1.5">
-          <span className="font-serif text-lg tracking-wide text-foreground">
-            WEEG<span className="text-accent">GO</span>
-          </span>
-        </Link>
+        <div className="flex items-center justify-between gap-2 px-2 py-1.5">
+          <Link href="/agent" className="flex items-center gap-2">
+            <span className="font-serif text-lg tracking-wide text-foreground group-data-[collapsible=icon]:hidden">
+              WEEG<span className="text-accent">GO</span>
+            </span>
+            <Image
+              src="/images/brand/weeggo-icon.svg"
+              alt="WEEGGO"
+              width={20}
+              height={20}
+              className="hidden group-data-[collapsible=icon]:block"
+            />
+          </Link>
+          <Badge variant="outline" className="group-data-[collapsible=icon]:hidden">
+            Agent
+          </Badge>
+        </div>
       </SidebarHeader>
 
       <SidebarContent>
