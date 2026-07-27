@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, Heart, Bell, CircleUserRound, type LucideIcon } from "lucide-react";
+import { Compass, Heart, Bell, CircleUserRound, type LucideIcon, Bot } from "lucide-react";
 
 import { useDiscover } from "@/lib/discover/filters-context";
 import { useTranslation, type TranslationKey } from "@/lib/i18n/useTranslation";
@@ -16,6 +16,7 @@ interface TabDef {
 const TABS: TabDef[] = [
   { href: "/", labelKey: "nav.discover", icon: Compass },
   { href: "/shortlist", labelKey: "nav.shortlist", icon: Heart },
+  { href: "/wizard", labelKey: "nav.wizard", icon: Bot },
   { href: "/notifications", labelKey: "nav.alerts", icon: Bell },
   { href: "/profile", labelKey: "nav.profile", icon: CircleUserRound },
 ];

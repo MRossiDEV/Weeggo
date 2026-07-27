@@ -25,6 +25,7 @@ export interface Dictionary {
   nav: {
     discover: string;
     shortlist: string;
+    wizard: string;
     alerts: string;
     profile: string;
   };
@@ -260,6 +261,7 @@ const es: Dictionary = {
   nav: {
     discover: "Explorar",
     shortlist: "Favoritos",
+    wizard: "Asistente",
     alerts: "Alertas",
     profile: "Perfil",
   },
@@ -498,6 +500,7 @@ const en: Dictionary = {
   nav: {
     discover: "Discover",
     shortlist: "Shortlist",
+    wizard: "Assistant",
     alerts: "Alerts",
     profile: "Profile",
   },
