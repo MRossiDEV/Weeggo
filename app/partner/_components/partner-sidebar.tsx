@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { LayoutDashboard, LogOut } from "lucide-react";
 
 import {
@@ -15,16 +16,22 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Logo } from "@/components/Logo";
 import { signOutPartnerAction } from "@/app/partner/_lib/actions/auth";
 
 export function PartnerSidebar({ partnerName }: { partnerName: string }) {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <Link href="/partner" className="flex items-center gap-2 px-2 py-1.5">
-          <span className="font-serif text-lg tracking-wide text-foreground">
-            WEEG<span className="text-accent">GO</span>
-          </span>
+        <Link href="/partner" className="flex items-center px-2 py-1.5">
+          <Logo height={20} className="group-data-[collapsible=icon]:hidden" />
+          <Image
+            src="/images/brand/weeggo-icon.svg"
+            alt="WEEGGO"
+            width={20}
+            height={20}
+            className="hidden group-data-[collapsible=icon]:block"
+          />
         </Link>
       </SidebarHeader>
 

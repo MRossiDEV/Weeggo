@@ -12,9 +12,9 @@ export default async function PartnerSetPasswordPage({
   const invite = verifyInviteToken(token, "partner");
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="theme-weeggo flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm rounded-xl border border-border bg-card p-8">
-        <h1 className="font-serif text-2xl text-foreground">Portal de Partners</h1>
+        <h1 className="text-2xl font-extrabold text-foreground">Portal de Partners</h1>
 
         {invite ? (
           <>
