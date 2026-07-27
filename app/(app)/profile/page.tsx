@@ -73,16 +73,7 @@ export default function ProfilePage() {
 
       <AlertsSection />
 
-      <button
-        type="button"
-        onClick={() => {
-          reset();
-          router.push("/wizard");
-        }}
-        className="mx-auto mt-3.5 block text-xs text-muted-foreground underline"
-      >
-        {t("profile.startOver")}
-      </button>
+
     </div>
   );
 }

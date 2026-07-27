@@ -16,11 +16,12 @@ export function AppHeader() {
   const { t } = useTranslation();
 
   return (
-    <header className="shrink-0 border-b border-border bg-card py-2 px-4 safe-top">
-      <div className="mt-1 mb-2 flex items-center justify-between">
+    <header className="shrink-0 border-b border-border bg-card py-2 px-4">
+      <div className="mt-2 mb-2 flex items-center h-4 justify-between">
         <Link href="/" className="flex items-center">
           <Logo height={27} />
         </Link>
+        <span className="text-md text-[var(--weeggo-orange)]">HOME</span>
 
         <div className="flex items-center gap-2">
           <LanguageSwitcher />

@@ -281,7 +281,7 @@ const es: Dictionary = {
   },
 
   wizard: {
-    assistantName: "Wee (Asistente WEEGGO)",
+    assistantName: "Weebot",
     online: "Online",
     namePlaceholder: "¿Cómo te llamas?",
     skipAssistant: "Saltar al asistente",
@@ -293,7 +293,7 @@ const es: Dictionary = {
     completionHeading: "¡Listo, {name}!",
     completionHeadingGeneric: "¡Listo!",
     completionBody:
-      "Armamos una selección curada{hoods} según lo que nos contaste. Cuando encuentres algo que te encante, coordinamos la visita con un asesor.",
+      "Muy bien {name}, aqui tienes una selección personalizada de propiedades en {hoods} según lo que me pediste. Si encuentras alguna de estas opcione que te interese, dejame sabe y podemos coordinamos una entrevista con un asesor.",
     processingLead: "{name}, buscando",
     processingLeadGeneric: "Buscando",
     anywhere: "Uruguay",
@@ -520,7 +520,7 @@ const en: Dictionary = {
   },
 
   wizard: {
-    assistantName: "Wee (WEEGGO Assistant)",
+    assistantName: "Weebot",
     online: "Online",
     namePlaceholder: "What's your name?",
     skipAssistant: "Skip the assistant",

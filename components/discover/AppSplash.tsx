@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { motion } from "framer-motion";
 
 import { Logo } from "@/components/Logo";
+import { LogoIcon } from "../LogoIcon";
 
 export function AppSplash({ onComplete }: { onComplete: () => void }) {
   useEffect(() => {
@@ -24,7 +25,8 @@ export function AppSplash({ onComplete }: { onComplete: () => void }) {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
-        <Logo height={30} />
+        {/* <Logo height={30} /> */}
+        <LogoIcon height={35} />
       </motion.div>
 
       <motion.div

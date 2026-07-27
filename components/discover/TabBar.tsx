@@ -37,7 +37,7 @@ export function TabBar() {
             key={tab.href}
             href={tab.href}
             className={`relative flex flex-1 flex-col items-center pb-2 gap-1 text-[10.5px] font-bold ${
-              isActive ? "text-primary" : "text-muted-foreground"
+              isActive ? "text-[var(--weeggo-orange)]" : "text-muted-foreground"
             }`}
           >
             <span className="relative">

@@ -122,30 +122,6 @@ export function SwipeCard({
       }}
     >
       <div className="relative min-h-0 flex-1 bg-muted">
-        <div className="absolute inset-x-3 top-3 z-10 flex gap-1">
-          {listing.images.map((_, i) => (
-            <span
-              key={i}
-              className={`h-[3px] flex-1 rounded-full ${i === photoIndex ? "bg-white" : "bg-white/40"}`}
-            />
-          ))}
-        </div>
-
-        {isTop && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onQuickLike();
-            }}
-            aria-label={t("discover.shortlistAria")}
-            className="absolute right-3 top-3 z-10 flex size-[34px] items-center justify-center rounded-full bg-white/95 shadow-[0_4px_10px_-3px_rgba(0,0,0,0.3)]"
-            style={{ color: "var(--weeggo-orange)" }}
-          >
-            <Heart className="size-[15px]" fill="currentColor" />
-          </button>
-        )}
-
         {/* eslint-disable-next-line @next/next/no-img-element -- listing photos are arbitrary Supabase-stored URLs */}
         <img src={listing.image} alt={listing.title} className="size-full object-cover" />
 
